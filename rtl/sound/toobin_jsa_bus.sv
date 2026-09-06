@@ -111,7 +111,11 @@ module toobin_jsa_bus
 	toobin_jsa_io u_io (
 		.clk(clk), .reset(reset), .ce_jsa(ce_jsa),
 		.wrio_wr(sel_wrio & wr_stb), .wrio_data(cpu_dout),
-		.irqack((sel_irqack) & ce),   // /IRQACK on read or write to 0x2806
+		// /IRQACK is READ-only on hardware: PAL 136056-2101's /SRD output is the
+		// LS138 4M active-high enable, and inside the 0x2800 block it is high only
+		// for (read & /SA9) or (write & SA9), so Y3 (/IRQACK) can only fire on a
+		// read.  MAME maps it r/w; the Toobin ROM only ever does BIT $2806.
+		.irqack(sel_irqack & rd_stb),
 		.self_test(self_test), .nmi_line_n(~snd_nmi), .resp_full(snd2main_ready),
 		.coin1(coin1), .coin2(coin2),
 		.cpu_bank(cpu_bank), .coin_ctr1(coin_ctr1), .coin_ctr2(coin_ctr2),

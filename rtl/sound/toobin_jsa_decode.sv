@@ -4,11 +4,20 @@
 // Toobin' JSA-I sound-CPU (6502) address decoder.
 //
 // Faithful to MAME atarijsa.cpp atarijsa1_map (JSA_MASTER_CLOCK 3.579545 MHz;
-// 6502 @ /2, YM2151 @ x1, POKEY @ /2).  Toobin is JSA-I = YM2151 + POKEY, with the
+// 6502 @ /2, YM2151 @ x1, POKEY @ /2), checked against the real decoder PAL:
+// Atari 136056-2101, the "2L-PAL" (PAL16L8A) on SP-320 sheet 20, named as such in
+// the Toobin' audio-PCB parts list (decode the JEDEC with `jedutil -view ...
+// gal16v8`).  Toobin is JSA-I = YM2151 + POKEY, with the
 // TMS5220 depopulated, so /VOICE (0x2A00) is a no-op here.
 //
+// The PAL agrees with MAME's map everywhere except one mirror: its /YAM output is
+//   /YAM = A13 & /A11 & /A12 & /A14 & /A15
+// i.e. the YM2151 answers across 0x2000-0x27FF (mirror 0x07FE), not just
+// 0x2000-0x2001.  (The PAL also makes /IRQACK read-only via the LS138 enable; that
+// lives in toobin_jsa_bus.sv where R/W is known.)
+//
 //   0x0000-0x1FFF  RAM (8 KB)
-//   0x2000-0x2001  YM2151 (reg select = A0)
+//   0x2000-0x27FF  YM2151 (reg select = A0)  (mirror 0x07FE, per the PAL)
 //   0x2800         N/C                        (mirror 0x01F9)
 //   0x2802         /RDP  sound_command_r      (mirror 0x01F9)
 //   0x2804         /RDIO read inputs          (mirror 0x01F9)
@@ -47,7 +56,7 @@ module toobin_jsa_decode
 	localparam logic [15:0] MPK = 16'hFC00;   // ~(0x03F0 mirror | 0x000F reg) : POKEY care mask
 
 	assign sel_ram    = (addr[15:13] == 3'b000);              // 0x0000-0x1FFF
-	assign sel_ym     = (addr & 16'hFFFE) == 16'h2000;        // 0x2000-0x2001
+	assign sel_ym     = (addr[15:11] == 5'b00100);            // 0x2000-0x27FF (PAL /YAM)
 	assign sel_rdp    = (addr & M28) == 16'h2802;
 	assign sel_rdio   = (addr & M28) == 16'h2804;
 	assign sel_irqack = (addr & M28) == 16'h2806;

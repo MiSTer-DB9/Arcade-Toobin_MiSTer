@@ -167,7 +167,7 @@ There are no outstanding hardware tests.
 
 MAME is this project's functional oracle, and every gate above measures the core
 *against* it — so this is a narrow claim, not a general one. It applies where the
-SP-320 schematics document something MAME's model does not, and in three of the seven
+SP-320 schematics document something MAME's model does not, and in three of the eight
 cases MAME's own source flags the gap.
 
 | Behaviour | MAME | This core |
@@ -179,6 +179,7 @@ cases MAME's own source flags the gap.
 | POKEY volume DAC | linear gate weights on this path | the measured non-power-of-two weights from the Altirra Hardware Reference Manual, carried at 11 bits |
 | Mid-frame register writes | re-composited at partial-update boundaries | applied on the scanline they occur — the core renders the raster live |
 | JSA `/RDIO` D6 | JSA I and II comments say active low, JSA III says active high | resolved from the sheet 22 LS240 |
+| JSA I 6502 address decode | `atarijsa.cpp` maps the YM2151 at 0x2000-0x2001 only and `/IRQACK` as read/write | the dumped decoder PAL 136056-2101: the YM2151 answers across 0x2000-0x27FF, and `/IRQACK` is read-only — neither is reachable by the shipping sound ROM |
 
 **The output filter is the largest of these.** Sheet 21 draws a unity-gain Sallen-Key
 2nd-order low-pass around LM324 4A, and the core implements it with the values read off
@@ -190,7 +191,7 @@ not on the LPF bit alone. POKEY's own output stage comes from the same sheet: pi
 `AUD` is a current output feeding LM324 2B as a transimpedance stage, whose single
 signal-path pole is R34 × C37 = 7.2 kHz.
 
-**The priority merge is the one backed by a fuse dump.** PAL 7E on sheet 16, Atari part
+**Two rows are backed by fuse dumps.** The priority merge: PAL 7E on sheet 16, Atari part
 136061-1151, was brute-forced from a real part and tested on a board, so
 `toobin_priority.sv` carries the silicon equation rather than a model of it. The two
 differ structurally: MAME treats playfield pen bit 3 as a gate that must be set before
@@ -206,6 +207,18 @@ two constraints the hardware equation reduces to exactly MAME's condition, so th
 agree on every frame Toobin' can produce. The equation is implemented because it is what
 the silicon does; the scan is reported because a divergence you cannot observe should be
 described as one.
+
+The other dump is the sound board's 6502 address decoder, the `2L-PAL` on sheet 20,
+Atari part 136056-2101 — the number the Toobin' audio-PCB parts list gives for it. Its
+equations match `atarijsa.cpp` everywhere except the two entries in the table: the
+`/YAM` output ignores A1-A10, so the YM2151 is mirrored across 0x2000-0x27FF, and its
+`/SRD` output doubles as the LS138 enable, splitting the 0x2800 register block so that
+`/RDP`, `/RDIO` and `/IRQACK` can only fire on reads and `/VOICE`, `/WRP`, `/WRIO` and
+`/MIX` only on writes. The core follows the PAL. The shipping sound ROM only ever writes
+the YM2151 at 0x2000/0x2001 and only ever reads `/IRQACK`, so again nothing observable
+changes. The same parts list has no entry for the second PAL drawn on that sheet (the
+`2M-FPAL` READY generator), so that location is an unpopulated option and the 6502's
+RDY sits on its pull-up, as the core has it.
 
 The analog chain beyond the poles above is still left alone on the original principle:
 no invented IIR is passed off as hardware accuracy.
@@ -299,7 +312,8 @@ package.
 Thanks also to **Caius**, who brute-forced the priority PAL (136061-1151) off a real
 board, to **gamefixer**, who tested the result on hardware, and to the **PLD Archive**
 for hosting it. That dump is the reason this core's compositor implements the actual
-equation rather than an approximation.
+equation rather than an approximation. Thanks likewise to whoever, signing as **MYF**,
+re-created the JSA sound-board decoder PAL (136056-2101) as a GAL16V8 in 2022.
 
 Toobin' and its ROMs, artwork and manuals are © Atari Games. This project contains no
 copyrighted ROM data.
