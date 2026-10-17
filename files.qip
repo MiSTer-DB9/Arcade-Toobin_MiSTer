@@ -52,7 +52,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_mo_render.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_priority.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_palette.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_video.sv
-set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/analog_hsize.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/crt_adjust.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/toobin_analog_adjust.sv
 
 # JSA board

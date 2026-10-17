@@ -12,7 +12,8 @@
 //                        [3:2]=unused coin 4/3 (inactive 0)
 //                        [1]=coin2  [0]=coin1
 // Sound IRQ: periodic at JSA_MASTER_CLOCK/4/16/16/14 (=14336 master ticks),
-//            level-latched, cleared by the /IRQACK strobe (0x2806).
+//            level-latched, cleared by the /IRQACK strobe (0x2806 READ; the
+//            decoder PAL 136056-2101 + LS138 never assert it on a write).
 
 module toobin_jsa_io #(parameter int IRQ_DIV = 14336)
 (
@@ -23,7 +24,7 @@ module toobin_jsa_io #(parameter int IRQ_DIV = 14336)
 	// /WRIO write (0x2A04)
 	input  logic        wrio_wr,
 	input  logic  [7:0] wrio_data,
-	// /IRQACK write (0x2806) clears the periodic IRQ
+	// /IRQACK read (0x2806) clears the periodic IRQ
 	input  logic        irqack,
 
 	// input-port sources
