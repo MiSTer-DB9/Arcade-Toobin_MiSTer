@@ -78,15 +78,29 @@ localparam CONF_STR = {
 	"O[5:4],Orientation,Vert,No Rotate,No Rotate 180;",
 	"O[22:20],Scale,Normal,V-Integer,HV-Integer,Narrower HV-Integer;",
 	"-;",
-	// Analog alignment.  Every field is plain two's complement, so the list is
-	// 0,+1..+max then -min..-1 and the decode is a $signed() -- see
-	// toobin_analog_adjust.sv.  None of these touch the core's timing.
-	"P1,Analog alignment;",
+	// CRT Adjust: rmonic79's MiSTer-CRT-Adjust engine (rtl/video/crt_adjust.sv)
+	// behind the glue in rtl/video/toobin_analog_adjust.sv.  Three amounts plus
+	// an On/Off.  H-Position is built as a content shift; the reasoning for this
+	// raster, and its +32 right-hand limit, is in toobin_analog_adjust.sv.
+	//
+	// Every amount is plain two's complement, so the list is 0,+1..+max then
+	// -min..-1 and the decode is a $signed().  None of these touch the core's
+	// timing; the stage sits between toobin_core and arcade_video.  Off is a
+	// bit-exact bypass, so HDMI is untouched unless the user turns it On.
+	//
+	// H1 hides the three amounts while the stage is inactive, which includes the
+	// case where the framework has forced the scandoubler and the stage gates
+	// itself off (see `crt_enable`).
+	//
+	// Bits 47..65 are fresh on purpose: the previous analog stage used 23..46
+	// (H-Size, H-Position, VGA H-Shift, VGA V-Shift), and reusing them would
+	// read an old saved H-Size as an On/Off.  23..46 are left unused.
+	"P1,CRT Adjust;",
 	"P1-;",
-	"P1O[27:23],CRT H-Size,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
-	"P1O[34:28],CRT H-Position,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,+32,+33,+34,+35,+36,+37,+38,+39,+40,+41,+42,+43,+44,+45,+46,+47,+48,+49,+50,+51,+52,+53,+54,+55,+56,+57,+58,+59,+60,+61,+62,+63,-64,-63,-62,-61,-60,-59,-58,-57,-56,-55,-54,-53,-52,-51,-50,-49,-48,-47,-46,-45,-44,-43,-42,-41,-40,-39,-38,-37,-36,-35,-34,-33,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
-	"P1O[40:35],Analog VGA H-Shift,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
-	"P1O[46:41],Analog VGA V-Shift,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
+	"P1O[47],CRT Adjust,Off,On;",
+	"H1P1O[52:48],CRT H-Size,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
+	"H1P1O[59:53],CRT H-Position,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,+32,+33,+34,+35,+36,+37,+38,+39,+40,+41,+42,+43,+44,+45,+46,+47,+48,+49,+50,+51,+52,+53,+54,+55,+56,+57,+58,+59,+60,+61,+62,+63,-64,-63,-62,-61,-60,-59,-58,-57,-56,-55,-54,-53,-52,-51,-50,-49,-48,-47,-46,-45,-44,-43,-42,-41,-40,-39,-38,-37,-36,-35,-34,-33,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
+	"H1P1O[65:60],CRT V-Shift,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
 	"-;",
 	// No DIP page: Toobin' has no dip switches.  MAME's INPUT_PORTS_START(toobin) has only
 	// the FF8800 controls and the FF9000 service/status word; every operator setting lives
@@ -103,6 +117,12 @@ localparam CONF_STR = {
 wire        forced_scandoubler;
 wire  [1:0] buttons;
 wire [127:0] status;
+// CRT Adjust master enable.  Declared here because status_menumask below reads
+// it.  The read rate assumes the native 15 kHz pixel ratio, so the stage turns
+// itself off whenever the framework forces the scandoubler (upstream's rule),
+// and the H1 menu entries hide while it is off.
+wire crt_enable = status[47] & ~forced_scandoubler;
+
 wire [10:0] ps2_key;
 wire        direct_video;
 wire [21:0] gamma_bus;
@@ -130,7 +150,7 @@ hps_io #(.CONF_STR(CONF_STR)) hps_io
 
 	.buttons(buttons),
 	.status(status),
-	.status_menumask(1'b0),
+	.status_menumask({14'd0, ~crt_enable, 1'b0}),
 
 	.ioctl_download(ioctl_download),
 	.ioctl_wr(ioctl_wr),
@@ -263,22 +283,22 @@ wire       video_rotated;
 
 assign CLK_VIDEO = clk_sys;
 
-// Analog alignment (CRT H-Size / H-Position, VGA H-Shift / V-Shift).  Placed
-// ahead of arcade_video so the mixer, scandoubler and video_freak all see the
-// adjusted raster; the core's own timing is untouched.  With H-Size active the
-// pixel rate is no longer ce_pix, which is why arcade_video is clocked from
-// adj_ce rather than ce_pix.
+// CRT Adjust (H-Size / H-Position / V-Shift, see toobin_analog_adjust.sv).
+// Placed ahead of arcade_video so the mixer, scandoubler and video_freak all
+// see the adjusted raster; the core's own timing is untouched.  While On the
+// pixel rate is the stage's read rate, not ce_pix, which is why arcade_video is
+// clocked from adj_ce rather than ce_pix.
 wire [7:0] adj_r, adj_g, adj_b;
 wire       adj_hs, adj_vs, adj_hb, adj_vb, adj_ce;
 
-toobin_analog_adjust #(.H_TOTAL(640), .V_TOTAL(416), .CLK_PER_PIX(4)) u_analog_adjust
+toobin_analog_adjust #(.H_TOTAL(640), .V_TOTAL(416), .CLK_PER_PIX(4), .HPOS_MODE(1), .AW(11)) u_analog_adjust
 (
 	.clk        (clk_sys),
 	.ce_pix     (ce_pix),
-	.osd_hsize  (status[27:23]),
-	.osd_hpos   (status[34:28]),
-	.osd_hshift (status[40:35]),
-	.osd_vshift (status[46:41]),
+	.osd_on     (crt_enable),
+	.osd_hsize  (status[52:48]),
+	.osd_hpos   (status[59:53]),
+	.osd_vshift (status[65:60]),
 	.r_in (R), .g_in (G), .b_in (B),
 	.hs_in(HSync), .vs_in(VSync), .hb_in(HBlank), .vb_in(VBlank),
 	.r_out(adj_r), .g_out(adj_g), .b_out(adj_b),

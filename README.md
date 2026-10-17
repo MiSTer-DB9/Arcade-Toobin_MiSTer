@@ -93,9 +93,14 @@ through MiSTer's *Save Settings* (the MRA declares a 512-byte NVRAM).
 
 The cabinet used a portrait CRT (ROT270), so **Orientation** offers *Vert* (rotate
 into the framebuffer for a normal landscape monitor), *No Rotate* (passthrough for a
-physically rotated TATE monitor) and *No Rotate 180*. An **Analog alignment** page
-provides CRT H-Size / H-Position and analog VGA H/V-Shift; none of it touches core
-timing.
+physically rotated TATE monitor) and *No Rotate 180*. A **CRT Adjust** page
+(rmonic79's [MiSTer-CRT-Adjust](https://github.com/rmonic79/MiSTer-CRT-Adjust)
+engine) provides an On/Off switch plus CRT H-Size, H-Position and V-Shift for analog
+15 kHz output; none of it touches core timing, and Off is a bit-exact bypass, so HDMI is
+untouched unless it is turned On. It switches itself off when the scandoubler is
+forced. H-Position moves the picture inside a native HSync; past +32 at H-Size 0 the
+right edge runs off the line, and when enlarging, a negative H-Position buys that room
+back.
 
 ## Hardware baseline
 
@@ -287,7 +292,9 @@ but cannot edit — add and remove entries by hand.
 
 ## Attribution
 
-This core's own RTL is **GPL-2.0-or-later** (every file carries an SPDX tag). Because it
+This core's own RTL is **GPL-2.0-or-later** (every file carries an SPDX tag), except
+`rtl/video/toobin_analog_adjust.sv`, which is written from MiSTer-CRT-Adjust's
+GPL-3.0 example glue and is GPL-3.0-or-later. Because it
 builds on GPL-3.0-or-later components, the **combined work is GPL-3.0-or-later** — which
 is what `LICENSE` contains. Individual components keep their own notices, which must be
 preserved:
@@ -299,7 +306,7 @@ preserved:
 | T65 (6502) | Daniel Wallner, with fixes by Mike Johnson, ehenciak and Wolfgang Scherr (OpenCores / FPGAArcade) | BSD-style |
 | POKEY | Mike Johnson (FPGAArcade) | BSD-style |
 | jt51 (YM2151) | Jose Tejada (jotego) | GPL-3.0-or-later |
-| `analog_hsize` | Umberto Parisi (rmonic79) | GPL-3.0-or-later |
+| `crt_adjust` ([MiSTer-CRT-Adjust](https://github.com/rmonic79/MiSTer-CRT-Adjust) `c682de9`) | Umberto Parisi (rmonic79) | GPL-3.0-or-later |
 
 The 68010, 6502, POKEY and SDRAM building blocks were taken from the
 **Arcade-Atari-system1** MiSTer core; the video-pipeline architecture and verification
