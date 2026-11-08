@@ -10,16 +10,16 @@ source "${SCRIPT_DIR}/retry.sh"
 source "${SCRIPT_DIR}/rerere_train.sh"  # configure_rerere
 
 UPSTREAM_REPO="https://github.com/MiSTer-devel/Arcade-Toobin_MiSTer.git"
-CORE_NAME=(Toobin)
+CORE_NAME=(Arcade-Toobin)
 # Upstream release-file grep pattern (per element of CORE_NAME). Same length as
 # CORE_NAME; for base sections this matches RELEASE_CORE_NAME, for variant-only
 # sections (e.g. NeoGeo_24MHz_cpu_only) it carries the base name that upstream's
 # releases/ actually contains.
-UPSTREAM_CORE_NAME=(Toobin)
+UPSTREAM_CORE_NAME=(Arcade-Toobin)
 MAIN_BRANCH="main"
 UPSTREAM_BRANCH="main"
-COMPILATION_INPUT=(Toobin.qpf)
-COMPILATION_OUTPUT=(output_files/Toobin.rbf)
+COMPILATION_INPUT=(Arcade-Toobin.qpf)
+COMPILATION_OUTPUT=(output_files/Arcade-Toobin.rbf)
 # Directory upstream publishes its built cores into. `releases` is the
 # MiSTer-devel convention; third-party upstreams may publish elsewhere (e.g.
 # misteraddons/SYSTEM11_MiSTer → release/_Arcade/cores).
